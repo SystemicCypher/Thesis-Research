@@ -40,7 +40,7 @@ class LSTM:
         step : This is the current time step that the LSTM is on 
         '''
         with tf.variable_scope("LSTM_Step"):
-            hidden, new_state = self.lstm_cell(x, state)
+            hidden, new_state = self.lstm_cell(input_vec, state)
         
         return hidden, new_state
         
