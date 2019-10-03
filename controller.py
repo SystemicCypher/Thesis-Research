@@ -1,29 +1,22 @@
-import tensorflow as tf
-import tensorboard 
+import torch as t
 
-class LSTM:
+class controllerLSTM(t.nn.Module):
 
-    def __init__(self, input_vector_size, memory_size, n_layers, out_vec_size=None, initializer=tf.random.normal, initial_stddev=None):
+    def __init__(self, input_vector_size, memory_size, num_layers):
+        super(controllerLSTM, self).__init__()
+
         self.input_vector_size = input_vector_size
         self.memory_size = memory_size
-        self.n_layers = n_layers
-        self.out_layer_exists = False
-        self.out_vec_size = self.memory_size
+
+        #The number of layers to create
+        self.num_layers = num_layers
         
-        if out_vec_size is not None:
-            self.out_vec_size = out_vec_size
-            self.out_layer_exists = True
-
-            self.weights = tf.Variable(initializer([self.memory_size, self.out_vec_size ], stddev=initial_stddev), name="out_weights")
-            self.biases = tf.Variable(initializer([self.out_vec_size], stddev=initial_stddev), name="out_bias")
-        
-        #
-        single_cell = tf.nn.rnn_cell.LSTMCell
-        # Constructs N LSTM cells, stacked
-        self.lstm_cell = tf.nn.rnn_cell.MultiRNNCell([single_cell(self.memory_size) for _ in range(self.n_layers)])
+        # Creating L lstm layers for a single time step
+        single_cell = t.nn.LSTMCell(self.input_vector_size, self.memory_size)
+        self.controller_layers = [single_cell for _ in range(self.num_layers)]
 
 
-    def time_step(self, input_vec, state, step):
+    def forward(self, input_vec, hidden, state, step):
         '''
         This function will return the output vector of all the
         hidden states per time step
@@ -39,10 +32,17 @@ class LSTM:
 
         step : This is the current time step that the LSTM is on 
         '''
-        with tf.variable_scope("LSTM_Step"):
-            hidden, new_state = self.lstm_cell(input_vec, state)
+        new_hidden = []
+        new_state = []
         
-        return hidden, new_state
+        #TODO Need to pass lower layer's state and hidden to higher layers 
+        
+        for l in self.controller_layers:
+            h, c = l(input_vec, (hidden, state))
+            new_hidden.append(h)
+            new_state.append(c)
+        
+        return t.Tensor(new_hidden), t.Tensor(new_state)
         
     
  

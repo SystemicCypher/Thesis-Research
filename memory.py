@@ -1,12 +1,13 @@
-import tensorflow as tf 
-import tensorboard
+import torch as t 
 
 class Memory:
 
     def __init__(self, memory_size):
+        super(Memory, self).__init__()
+
         self.memory_size = memory_size
 
-    def receive_interface(self, interface_vec, writeable_data=None):
+    def memory_action(self, interface_vec, writeable_data=None):
         '''
         This function receives the interface vector and then 
         either erases/writes or reads data
