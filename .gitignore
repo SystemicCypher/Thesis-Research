@@ -1,1 +1,6 @@
 /.vscode
+*.pt
+
+MNIST/raw/
+
+*.h5py
